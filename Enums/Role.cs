@@ -3,6 +3,6 @@
     internal enum Role
     {
         Admin,
-        Customer,
+        Customer
     }
 }

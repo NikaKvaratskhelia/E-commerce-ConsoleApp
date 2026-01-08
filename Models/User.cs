@@ -13,7 +13,7 @@ namespace E_commerce.Models
         public double Balance { get; set; }
         public string CreatedAt { get; private set; }
         public bool IsActive { get; set; }
-        public List<Product> Cart { get; set; } = new List<Product>();
+        public List<Order> Cart { get; set; } = new List<Order>();
 
         public User(string username, string password, string email, Role role, double balance)
         {

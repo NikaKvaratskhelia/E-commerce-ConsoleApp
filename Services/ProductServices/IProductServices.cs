@@ -8,6 +8,7 @@
         public void GetAllProducts();
         public void GetProductById();
         public void FilterProductsByCategory();
+        public void BuyProduct();
 
     }
 }

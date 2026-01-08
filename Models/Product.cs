@@ -5,7 +5,7 @@ namespace E_commerce.Models
     internal class Product
     {
         private static int _id = 1;
-        public int ProductId { get; private set; }
+        public int ProductId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public double Price { get; set; }
@@ -27,9 +27,26 @@ namespace E_commerce.Models
             CreatedAt = result;
         }
 
+        public static void SetNextId(int nextId)
+        {
+            _id = nextId;
+            Console.WriteLine(nextId);
+        }
+
+
         public override string ToString()
         {
-            return $"ProductId: {ProductId}, Name: {Name}, Description: {Description}, Price: {Price}, Stock: {Stock}, Category: {Category}";
+            return
+                $"====================\n" +
+                $"Product ID: {ProductId}\n" +
+                $"Name      : {Name}\n" +
+                $"Description: {Description}\n" +
+                $"Price     : ${Price}\n" +
+                $"Stock     : {Stock}\n" +
+                $"Category  : {Category}\n" +
+                $"Created At: {CreatedAt}\n" +
+                $"====================";
         }
+
     }
 }

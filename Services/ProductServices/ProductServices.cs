@@ -1,4 +1,6 @@
-﻿using E_commerce.Models;
+﻿using E_commerce.Enums;
+using E_commerce.Models;
+using E_commerce.Services.UserServices;
 using System.Text.Json;
 
 namespace E_commerce.Services.ProductServices
@@ -6,25 +8,89 @@ namespace E_commerce.Services.ProductServices
     internal class ProductServices : IProductServices
     {
         public static List<Product> _products = new List<Product>();
+
         public static string _path = "products.json";
         public static void LoadProducts()
         {
+            if (!File.Exists(_path))
+                return;
+
             string json = File.ReadAllText(_path);
             var products = JsonSerializer.Deserialize<List<Product>>(json);
 
-            if (products != null) _products = products;
+            if (products == null || products.Count == 0)
+                return;
+
+            _products = products;
+
+            int nextId = products.Max(p => p.ProductId) + 1;
+            Product.SetNextId(nextId);
         }
+
         public static void SaveProducts()
         {
             string json = JsonSerializer.Serialize(_products);
             File.WriteAllText(_path, json);
         }
+
+        public void BuyProduct()
+        {
+            Console.Clear();
+            GetAllProducts();
+
+            Console.WriteLine();
+            Console.Write("Enter Product ID: ");
+            int id = int.Parse(Console.ReadLine());
+
+            var product = _products.FirstOrDefault(p => p.ProductId == id);
+
+            if (product == null) throw new Exception($"Product with id of {id} does not exist");
+
+            UserServices.UserServices.BuyProduct(product);
+            SaveProducts();
+            Console.Clear();
+        }
         public void CreateProduct()
         {
+            Console.Clear();
+            Console.Write("Name: ");
+            string name = Console.ReadLine();
 
+            Console.Write("Description: ");
+            string description = Console.ReadLine();
+
+            Console.Write("Price: ");
+            double price = double.Parse(Console.ReadLine());
+
+            Console.Write("Stock: ");
+            int stock = int.Parse(Console.ReadLine());
+
+            Console.Write("Category: ");
+            string categoryInput = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(name) ||
+                string.IsNullOrWhiteSpace(description) ||
+                string.IsNullOrWhiteSpace(price.ToString()) ||
+                string.IsNullOrWhiteSpace(stock.ToString()) ||
+                !Enum.TryParse(categoryInput, out Enums.Category category)
+                )
+            {
+                throw new Exception("Fields can not be empty!");
+            }
+
+            if (price <= 0) throw new Exception("Price must be greater than 0!");
+            if (stock < 0) throw new Exception("Stock can not be negative!");
+
+            Product product = new Product(name, description, price, stock, category);
+
+            _products.Add(product);
+            SaveProducts();
+            Console.WriteLine("Product added successfully!");
+            Console.Clear();
         }
         public void DeleteProduct()
         {
+            Console.Clear();
             GetAllProducts();
 
             Console.Write("Enter Product Id to delete: ");
@@ -38,9 +104,11 @@ namespace E_commerce.Services.ProductServices
             _products.Remove(product);
             SaveProducts();
             Console.WriteLine("Product deleted Successfully!");
+            Console.Clear();
         }
         public void FilterProductsByCategory()
         {
+            Console.Clear();
             Console.WriteLine("Valid Categories: Phones, Laptops, Accessories, Tablets, Chargers");
             Console.Write("Enter category to filter with: ");
 
@@ -65,6 +133,7 @@ namespace E_commerce.Services.ProductServices
         }
         public void GetAllProducts()
         {
+            Console.Clear();
             foreach (var product in _products)
             {
                 Console.WriteLine(product);
@@ -73,6 +142,7 @@ namespace E_commerce.Services.ProductServices
 
         public void GetProductById()
         {
+            Console.Clear();
             Console.Write("Enter product id: ");
             string input = Console.ReadLine();
 
@@ -87,6 +157,7 @@ namespace E_commerce.Services.ProductServices
 
         public void UpdateProduct()
         {
+            Console.Clear();
             Console.Write("Enter product id: ");
             string input = Console.ReadLine();
 
@@ -109,12 +180,11 @@ namespace E_commerce.Services.ProductServices
             string category = Console.ReadLine();
 
             Console.Write("New price (leave empty to keep current): ");
-            string price = Console.ReadLine();
+            string newPrice = Console.ReadLine();
 
-            if (!Enum.TryParse(category, out Enums.Category newCat))
-            {
-                throw new Exception("Valid cateogries are: Phones, Laptops, Accessories, Tablets, Chargers");
-            }
+            Console.Write("New stock (leave empty to keep current): ");
+            string newStock = Console.ReadLine();
+
 
             if (!string.IsNullOrWhiteSpace(newName))
                 product.Name = newName;
@@ -122,12 +192,19 @@ namespace E_commerce.Services.ProductServices
             if (!string.IsNullOrWhiteSpace(newDesc))
                 product.Description = newDesc;
 
-            if (!string.IsNullOrWhiteSpace(category) && Enum.TryParse(category, out Enums.Category newCategory))
-                product.Category = newCategory;
+            if (!string.IsNullOrWhiteSpace(category) && Enum.TryParse(category, out Enums.Category newCat))
+            {
+                product.Category = newCat;
+            }
 
-            if (!string.IsNullOrWhiteSpace(price))
-                product.Price = double.Parse(price);
+            if (!string.IsNullOrWhiteSpace(newPrice))
+                product.Price = double.Parse(newPrice);
 
+
+            if (!string.IsNullOrWhiteSpace(newStock))
+                product.Stock = int.Parse(newStock);
+
+            Console.Clear();
         }
     }
 }

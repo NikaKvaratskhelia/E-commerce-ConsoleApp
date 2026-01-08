@@ -6,16 +6,42 @@ namespace E_commerce.Services.UserServices
 {
     internal class UserServices : IUserServices
     {
-        public User? _currentUser = null;
+        public static User? _currentUser = null;
 
         private static List<User> _users = new List<User>();
         public static string _path = "users.json";
+        public static string _currentUserPath = "currentUser.json";
         public static void LoadUsers()
         {
+            if (!File.Exists(_path))
+                return;
+
             string json = File.ReadAllText(_path);
             var users = JsonSerializer.Deserialize<List<User>>(json);
 
-            if (users != null) _users = users;
+            if (users == null || users.Count == 0)
+                return;
+
+            _users = users;
+        }
+
+        public static void LoadCurrentUser()
+        {
+            if (!File.Exists(_currentUserPath))
+                return;
+
+            string json = File.ReadAllText(_currentUserPath);
+            var user = JsonSerializer.Deserialize<User>(json);
+
+            if (user == null)
+                return;
+
+            _currentUser = user;
+        }
+        public static void SaveCurrentUser()
+        {
+            string json = JsonSerializer.Serialize(_currentUser);
+            File.WriteAllText(_currentUserPath, json);
         }
         public static void SaveUsers()
         {
@@ -24,6 +50,7 @@ namespace E_commerce.Services.UserServices
         }
         public User Login()
         {
+            Console.Clear();
             Console.Write("Enter User Email: ");
             string email = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(email)) throw new Exception("Email cannot be empty.");
@@ -40,6 +67,8 @@ namespace E_commerce.Services.UserServices
                 _currentUser = user;
                 _currentUser.IsActive = true;
                 Console.WriteLine("Login Successful!");
+                SaveUsers();
+                SaveCurrentUser();
                 return _currentUser;
             }
             else
@@ -50,6 +79,7 @@ namespace E_commerce.Services.UserServices
         }
         public User Logout()
         {
+            Console.Clear();
             if (_currentUser == null)
             {
                 Console.WriteLine("No user is currently logged in.");
@@ -59,10 +89,13 @@ namespace E_commerce.Services.UserServices
             _currentUser.IsActive = false;
             _currentUser = null;
             Console.WriteLine("Logged out successfully!");
+            SaveUsers();
+            SaveCurrentUser();
             return _currentUser;
         }
         public void Register()
         {
+            Console.Clear();
             Console.Write("Username: ");
             var username = Console.ReadLine()?.Trim();
 
@@ -112,6 +145,7 @@ namespace E_commerce.Services.UserServices
         }
         public void ShowProfile()
         {
+            Console.Clear();
             if (_currentUser == null)
                 throw new Exception("No user is currently logged in.");
 
@@ -119,12 +153,18 @@ namespace E_commerce.Services.UserServices
         }
         public void UpdateBalance()
         {
+            Console.Clear();
             Console.Write("Enter amount to deposit: ");
             string input = Console.ReadLine();
 
             if (!string.IsNullOrWhiteSpace(input))
             {
                 double balance = double.Parse(input);
+
+                if (balance <= 0)
+                    throw new Exception("Amount must be greater than zero.");
+
+                _currentUser.Balance += balance;
             }
             else
             {
@@ -133,6 +173,7 @@ namespace E_commerce.Services.UserServices
         }
         public void UpdateProfile()
         {
+            Console.Clear();
             if (_currentUser == null)
                 throw new Exception("No user is currently logged in.");
 
@@ -182,6 +223,47 @@ namespace E_commerce.Services.UserServices
 
             SaveUsers();
             Console.WriteLine("Profile updated successfully.");
+        }
+
+        public static void BuyProduct(Product item)
+        {
+            if (_currentUser == null)
+                throw new Exception("No user is logged in.");
+
+            if (item == null)
+                throw new Exception("Product does not exist.");
+
+            if (_currentUser.Role == Role.Admin)
+                throw new Exception("Admins cannot buy products.");
+
+            if (item.Stock <= 0)
+                throw new Exception("Product is out of stock.");
+
+            if (_currentUser.Balance < item.Price)
+                throw new Exception("Insufficient balance.");
+
+            item.Stock--;
+            _currentUser.Balance -= item.Price;
+
+            var productInCart = _currentUser.Cart.FirstOrDefault(p => p.ProductId == item.ProductId);
+
+            if (productInCart != null)
+            {
+                productInCart.IncreaseQuantity();
+            }
+            else
+            {
+                _currentUser.Cart.Add(new Order(
+                       item.ProductId,
+                       item.Name,
+                       item.Price,
+                       1
+                ));
+            }
+
+            Console.WriteLine("Product bought successfully!");
+
+            SaveUsers();
         }
     }
 }
