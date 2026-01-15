@@ -1,5 +1,6 @@
 ﻿using E_commerce.Enums;
 using E_commerce.Models;
+using E_commerce.Validators;
 using System.Text.Json;
 
 namespace E_commerce.Services.UserServices
@@ -61,8 +62,8 @@ namespace E_commerce.Services.UserServices
             string password = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(password)) throw new Exception("Password cannot be empty.");
 
-            User user = _users.Find(u => u.Email == email && u.Password == password);
-            if (user != null)
+            var user = _users.FirstOrDefault(u => u.Email == email);
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
                 _currentUser = user;
                 _currentUser.IsActive = true;
@@ -105,14 +106,6 @@ namespace E_commerce.Services.UserServices
             Console.Write("Password: ");
             var password = Console.ReadLine();
 
-            if (string.IsNullOrWhiteSpace(username) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password))
-            {
-                Console.WriteLine("Registration failed: fields cannot be empty.");
-                return;
-            }
-
             if (_users.Any(u => u.Username == username))
             {
                 Console.WriteLine("Registration failed: username already exists.");
@@ -125,12 +118,6 @@ namespace E_commerce.Services.UserServices
                 return;
             }
 
-            if (password.Length < 6)
-            {
-                Console.WriteLine("Registration failed: password too short.");
-                return;
-            }
-
             User user = new User(
                 username,
                 password,
@@ -138,6 +125,24 @@ namespace E_commerce.Services.UserServices
                 Role.Customer,
                 0
             );
+
+            UserValidators validator = new UserValidators();
+            var validationResult = validator.Validate(user);
+
+            if (!validationResult.IsValid)
+            {
+                Console.WriteLine("Registration failed due to the following errors:");
+                foreach (var error in validationResult.Errors)
+                {
+                    Console.WriteLine($"- {error.ErrorMessage}");
+                }
+                return;
+            }
+
+            if (validationResult.IsValid)
+            {
+                user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            }
 
             _users.Add(user);
             SaveUsers();
