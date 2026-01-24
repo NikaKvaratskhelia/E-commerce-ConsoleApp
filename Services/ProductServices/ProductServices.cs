@@ -1,6 +1,7 @@
 ﻿using E_commerce.Enums;
 using E_commerce.Models;
 using E_commerce.Services.UserServices;
+using E_commerce.Validators;
 using System.Text.Json;
 
 namespace E_commerce.Services.ProductServices
@@ -83,9 +84,26 @@ namespace E_commerce.Services.ProductServices
 
             Product product = new Product(name, description, price, stock, category);
 
-            _products.Add(product);
-            SaveProducts();
-            Console.WriteLine("Product added successfully!");
+            ProductValidators validationRules = new ProductValidators();
+            var validationResult = validationRules.Validate(product);
+
+            if (!validationResult.IsValid)
+            {
+                Console.WriteLine("Registration failed due to the following errors:");
+                foreach (var error in validationResult.Errors)
+                {
+                    Console.WriteLine($"- {error.ErrorMessage}");
+                }
+                return;
+            }
+
+            if (validationResult.IsValid)
+            {
+                _products.Add(product);
+                SaveProducts();
+                Console.WriteLine("Product added successfully!");
+            }
+
             Console.Clear();
         }
         public void DeleteProduct()

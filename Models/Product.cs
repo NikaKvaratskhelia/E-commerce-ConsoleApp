@@ -30,7 +30,6 @@ namespace E_commerce.Models
         public static void SetNextId(int nextId)
         {
             _id = nextId;
-            Console.WriteLine(nextId);
         }
 
 
