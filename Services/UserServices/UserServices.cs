@@ -18,6 +18,7 @@ namespace E_commerce.Services.UserServices
                 return;
 
             string json = File.ReadAllText(_path);
+            if (string.IsNullOrWhiteSpace(json)) return;
             var users = JsonSerializer.Deserialize<List<User>>(json);
 
             if (users == null || users.Count == 0)
@@ -67,14 +68,18 @@ namespace E_commerce.Services.UserServices
             {
                 _currentUser = user;
                 _currentUser.IsActive = true;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Login Successful!");
+                Console.ResetColor();
                 SaveUsers();
                 SaveCurrentUser();
                 return _currentUser;
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Invalid email or password.");
+                Console.ResetColor();
                 return null;
             }
         }
@@ -83,13 +88,17 @@ namespace E_commerce.Services.UserServices
             Console.Clear();
             if (_currentUser == null)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("No user is currently logged in.");
+                Console.ResetColor();
                 return null;
             }
 
             _currentUser.IsActive = false;
             _currentUser = null;
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Logged out successfully!");
+            Console.ResetColor();
             SaveUsers();
             SaveCurrentUser();
             return _currentUser;
@@ -108,13 +117,17 @@ namespace E_commerce.Services.UserServices
 
             if (_users.Any(u => u.Username == username))
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Registration failed: username already exists.");
+                Console.ResetColor();
                 return;
             }
 
             if (_users.Any(u => u.Email == email))
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Registration failed: email already exists.");
+                Console.ResetColor();
                 return;
             }
 
@@ -131,11 +144,13 @@ namespace E_commerce.Services.UserServices
 
             if (!validationResult.IsValid)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Registration failed due to the following errors:");
                 foreach (var error in validationResult.Errors)
                 {
                     Console.WriteLine($"- {error.ErrorMessage}");
                 }
+                Console.ResetColor();
                 return;
             }
 
@@ -146,7 +161,9 @@ namespace E_commerce.Services.UserServices
 
             _users.Add(user);
             SaveUsers();
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Registration successful.");
+            Console.ResetColor();
         }
         public void ShowProfile()
         {
@@ -154,7 +171,10 @@ namespace E_commerce.Services.UserServices
             if (_currentUser == null)
                 throw new Exception("No user is currently logged in.");
 
+            Console.WriteLine("Current User Profile:");
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(_currentUser);
+            Console.ResetColor();
         }
         public void UpdateBalance()
         {
@@ -170,6 +190,16 @@ namespace E_commerce.Services.UserServices
                     throw new Exception("Amount must be greater than zero.");
 
                 _currentUser.Balance += balance;
+                SaveUsers();
+
+
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.WriteLine("Balance updated successfully!");
+                Console.Write($"New Balance: ");
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write($"{_currentUser.Balance:C2}");
+                Console.ResetColor();
             }
             else
             {
@@ -197,7 +227,9 @@ namespace E_commerce.Services.UserServices
             {
                 if (_users.Any(u => u.Username == newUsername && u.UserId != _currentUser.UserId))
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Update failed: username already in use.");
+                    Console.ResetColor();
                     return;
                 }
 
@@ -208,7 +240,9 @@ namespace E_commerce.Services.UserServices
             {
                 if (_users.Any(u => u.Email == newEmail && u.UserId != _currentUser.UserId))
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Update failed: email already in use.");
+                    Console.ResetColor();
                     return;
                 }
 
@@ -219,7 +253,9 @@ namespace E_commerce.Services.UserServices
             {
                 if (newPassword.Length < 6)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Update failed: password too short.");
+                    Console.ResetColor();
                     return;
                 }
 
@@ -266,8 +302,9 @@ namespace E_commerce.Services.UserServices
                 ));
             }
 
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Product bought successfully!");
-
+            Console.ResetColor();
             SaveUsers();
         }
     }

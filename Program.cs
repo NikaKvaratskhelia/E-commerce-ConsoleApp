@@ -3,6 +3,7 @@ using E_commerce.Models;
 using E_commerce.Services.MenuServices;
 using E_commerce.Services.ProductServices;
 using E_commerce.Services.UserServices;
+using System.Drawing;
 
 MenuServices menuServices = new MenuServices();
 ProductServices productServices = new ProductServices();
@@ -50,7 +51,9 @@ while (true)
         }
         catch (Exception ex)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(ex.Message);
+            Console.ResetColor();
         }
     }
 
