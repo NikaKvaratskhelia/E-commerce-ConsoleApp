@@ -1,6 +1,7 @@
 ﻿using E_commerce.Enums;
 using E_commerce.Models;
 using E_commerce.Validators;
+using System.Text;
 using System.Text.Json;
 
 namespace E_commerce.Services.UserServices
@@ -8,10 +9,40 @@ namespace E_commerce.Services.UserServices
     internal class UserServices : IUserServices
     {
         public static User? _currentUser = null;
-
         private static List<User> _users = new List<User>();
         public static string _path = "users.json";
         public static string _currentUserPath = "currentUser.json";
+        private static string ReadPasswordMasked(string prompt = null)
+        {
+            if (!string.IsNullOrEmpty(prompt))
+                Console.Write(prompt);
+
+            var sb = new StringBuilder();
+            ConsoleKeyInfo keyInfo;
+            while (true)
+            {
+                keyInfo = Console.ReadKey(intercept: true);
+                if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine();
+                    break;
+                }
+                else if (keyInfo.Key == ConsoleKey.Backspace)
+                {
+                    if (sb.Length > 0)
+                    {
+                        sb.Length--;
+                        Console.Write("\b \b");
+                    }
+                }
+                else if (!char.IsControl(keyInfo.KeyChar))
+                {
+                    sb.Append(keyInfo.KeyChar);
+                    Console.Write('*');
+                }
+            }
+            return sb.ToString();
+        }
         public static void LoadUsers()
         {
             if (!File.Exists(_path))
@@ -59,8 +90,7 @@ namespace E_commerce.Services.UserServices
 
             Console.WriteLine();
 
-            Console.Write("Enter User Password: ");
-            string password = Console.ReadLine();
+            string password = ReadPasswordMasked("Enter User Password: ");
             if (string.IsNullOrWhiteSpace(password)) throw new Exception("Password cannot be empty.");
 
             var user = _users.FirstOrDefault(u => u.Email == email);
@@ -112,8 +142,7 @@ namespace E_commerce.Services.UserServices
             Console.Write("Email: ");
             var email = Console.ReadLine()?.Trim();
 
-            Console.Write("Password: ");
-            var password = Console.ReadLine();
+            string password = ReadPasswordMasked("Enter User Password: ");
 
             if (_users.Any(u => u.Username == username))
             {
@@ -175,6 +204,7 @@ namespace E_commerce.Services.UserServices
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(_currentUser);
             Console.ResetColor();
+            Console.ReadLine();
         }
         public void UpdateBalance()
         {
@@ -220,8 +250,7 @@ namespace E_commerce.Services.UserServices
             Console.Write("New email (leave empty to keep current): ");
             string newEmail = Console.ReadLine()?.Trim();
 
-            Console.Write("New password (leave empty to keep current): ");
-            string newPassword = Console.ReadLine();
+            string newPassword = ReadPasswordMasked("Enter new Password (leave blank to keep current): ");
 
             if (!string.IsNullOrWhiteSpace(newUsername))
             {

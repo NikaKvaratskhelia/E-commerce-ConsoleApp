@@ -58,16 +58,27 @@ while (true)
     }
 
 
-    if (UserServices._currentUser.Role == Role.Admin)
+    try
     {
-        menuServices.AdminMenu(userServices, productServices);
+        if (UserServices._currentUser.Role == Role.Admin)
+        {
+            menuServices.AdminMenu(userServices, productServices);
+        }
+        else if (UserServices._currentUser.Role == Role.Customer)
+        {
+            menuServices.UserMenu(userServices, productServices);
+        }
+        else
+        {
+            throw new Exception("There is no menu for other roles!");
+        }
     }
-    else if (UserServices._currentUser.Role == Role.Customer)
+    catch (Exception ex)
     {
-        menuServices.UserMenu(userServices, productServices);
-    }
-    else
-    {
-        throw new Exception("There is no menu for other roles!");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Clear();
+        Console.WriteLine(ex.Message);
+        Console.ReadLine();
+        Console.ResetColor();
     }
 }

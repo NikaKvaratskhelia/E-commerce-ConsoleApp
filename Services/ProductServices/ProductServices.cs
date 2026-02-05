@@ -93,6 +93,7 @@ namespace E_commerce.Services.ProductServices
                 foreach (var error in validationResult.Errors)
                 {
                     Console.WriteLine($"- {error.ErrorMessage}");
+                
                 }
                 return;
             }
@@ -122,6 +123,7 @@ namespace E_commerce.Services.ProductServices
             _products.Remove(product);
             SaveProducts();
             Console.WriteLine("Product deleted Successfully!");
+            Console.ReadLine();
             Console.Clear();
         }
         public void FilterProductsByCategory()
@@ -147,7 +149,10 @@ namespace E_commerce.Services.ProductServices
                 {
                     Console.WriteLine(item);
                 }
+                Console.ReadLine();
             }
+
+            Console.Clear();
         }
         public void GetAllProducts()
         {
@@ -156,6 +161,7 @@ namespace E_commerce.Services.ProductServices
             {
                 Console.WriteLine(product);
             }
+            Console.ReadLine();
         }
 
         public void GetProductById()
@@ -171,6 +177,7 @@ namespace E_commerce.Services.ProductServices
             if (product == null) throw new Exception("Product not found.");
 
             Console.WriteLine(product);
+            Console.ReadLine();
         }
 
         public void UpdateProduct()

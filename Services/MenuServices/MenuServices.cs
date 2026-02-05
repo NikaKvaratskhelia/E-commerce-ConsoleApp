@@ -7,65 +7,87 @@ namespace E_commerce.Services.MenuServices
         {
             while (true)
             {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"====================================================================");
+                Console.WriteLine($"|| Logged in as: {UserServices.UserServices._currentUser.Username}");
+                Console.WriteLine($"|| Role: {UserServices.UserServices._currentUser.Role}");
+                Console.WriteLine($"|| Balance: {UserServices.UserServices._currentUser.Balance}");
+                Console.WriteLine($"====================================================================");
+                Console.ResetColor();
+                Console.WriteLine();
                 Console.WriteLine("1. Show all products");
                 Console.WriteLine("2. Show product by ID");
                 Console.WriteLine("3. Filter products by category");
                 Console.WriteLine("4. Show Profile");
                 Console.WriteLine("5. Update Profile");
                 Console.WriteLine("6. Logout");
+                Console.WriteLine();
                 Console.WriteLine("========Update Product List=======");
                 Console.WriteLine("7. Add a product");
                 Console.WriteLine("8. Delete a product");
                 Console.WriteLine("9. Update a product");
+                Console.WriteLine();
+                Console.Write("Select an option: ");
 
                 string? choice = Console.ReadLine()?.Trim();
 
-                if (string.IsNullOrEmpty(choice))
+                try
                 {
-                    Console.WriteLine("Option cannot be empty");
-                    continue;
-                }
+                    if (string.IsNullOrEmpty(choice))
+                    {
+                        Console.WriteLine("Option cannot be empty");
+                        continue;
+                    }
 
-                if (choice == "1")
-                {
-                    productService.GetAllProducts();
+                    if (choice == "1")
+                    {
+                        productService.GetAllProducts();
+                    }
+                    else if (choice == "2")
+                    {
+                        productService.GetProductById();
+                    }
+                    else if (choice == "3")
+                    {
+                        productService.FilterProductsByCategory();
+                    }
+                    else if (choice == "4")
+                    {
+                        userService.ShowProfile();
+                    }
+                    else if (choice == "5")
+                    {
+                        userService.UpdateProfile();
+                    }
+                    else if (choice == "6")
+                    {
+                        userService.Logout();
+                        return;
+                    }
+                    else if (choice == "7")
+                    {
+                        productService.CreateProduct();
+                    }
+                    else if (choice == "8")
+                    {
+                        productService.DeleteProduct();
+                    }
+                    else if (choice == "9")
+                    {
+                        productService.UpdateProduct();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid option, try again.");
+                    }
+
+
+
                 }
-                else if (choice == "2")
+                catch (Exception ex)
                 {
-                    productService.GetProductById();
-                }
-                else if (choice == "3")
-                {
-                    productService.FilterProductsByCategory();
-                }
-                else if (choice == "4")
-                {
-                    userService.ShowProfile();
-                }
-                else if (choice == "5")
-                {
-                    userService.UpdateProfile();
-                }
-                else if (choice == "6")
-                {
-                    userService.Logout();
-                    return;
-                }
-                else if (choice == "7")
-                {
-                    productService.CreateProduct();
-                }
-                else if (choice == "8")
-                {
-                    productService.DeleteProduct();
-                }
-                else if (choice == "9")
-                {
-                    productService.UpdateProduct();
-                }
-                else
-                {
-                    Console.WriteLine("Invalid option, try again.");
+                    throw new Exception(ex.Message);
                 }
 
                 Console.WriteLine();
@@ -76,6 +98,15 @@ namespace E_commerce.Services.MenuServices
         {
             while (true)
             {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"====================================================================");
+                Console.WriteLine($"|| Logged in as: {UserServices.UserServices._currentUser.Username}");
+                Console.WriteLine($"|| Role: {UserServices.UserServices._currentUser.Role}");
+                Console.WriteLine($"|| Balance: {UserServices.UserServices._currentUser.Balance}");
+                Console.WriteLine($"====================================================================");
+                Console.ResetColor();
+                Console.WriteLine();
                 Console.WriteLine("1. Show all products");
                 Console.WriteLine("2. Show product by ID");
                 Console.WriteLine("3. Filter products by category");
@@ -84,6 +115,7 @@ namespace E_commerce.Services.MenuServices
                 Console.WriteLine("6. Update Profile");
                 Console.WriteLine("7. Update Balance");
                 Console.WriteLine("8. Logout");
+                Console.WriteLine();
                 Console.Write("Select an option: ");
 
                 string? choice = Console.ReadLine()?.Trim();
@@ -139,7 +171,7 @@ namespace E_commerce.Services.MenuServices
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    throw new Exception(ex.Message);
                 }
 
             }
